@@ -3,6 +3,7 @@
  * following copyright and licenses apply:
  *
  * Copyright 2020 Metrological
+ * Copyright 2025 CoreFrame.work
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -134,6 +135,26 @@ Certificate::~Certificate()
     }
 }
 
+Certificate& Certificate::operator=(Certificate&& rhs) noexcept {
+    if (_certificate != nullptr) {
+        X509_free(const_cast<x509_st*>(_certificate));
+    }
+    _certificate = rhs._certificate;
+    rhs._certificate = nullptr;
+    return (*this);
+}
+
+Certificate& Certificate::operator=(const Certificate& rhs) {
+    if (_certificate != nullptr) {
+        X509_free(const_cast<x509_st*>(_certificate));
+    }
+    _certificate = rhs._certificate;
+    if (_certificate != nullptr) {
+        X509_up_ref(const_cast<x509_st*>(_certificate));
+    }
+    return (*this);
+}
+
 string Certificate::Issuer() const {
     char buffer[1024];
     buffer[0] = '\0';
@@ -194,6 +215,27 @@ Key::Key(const string& fileName)
 
         BIO_free(bio_key);
     }
+}
+
+Key& Key::operator=(Key&& key) noexcept {
+    if (_key != nullptr) {
+        EVP_PKEY_free(const_cast<evp_pkey_st*>(_key));
+    }
+    _key = key._key;
+    key._key = nullptr;
+
+    return (*this);
+}
+
+Key& Key::operator=(const Key& key) {
+    if (_key != nullptr) {
+        EVP_PKEY_free(const_cast<evp_pkey_st*>(_key));
+    }
+    _key = key._key;
+    if (_key != nullptr) {
+        EVP_PKEY_up_ref(const_cast<evp_pkey_st*>(_key));
+    }
+    return (*this);
 }
 
 static int passwd_callback(char* buffer, int size, int /* flags */, void* password)

@@ -3,6 +3,7 @@
  * following copyright and licenses apply:
  *
  * Copyright 2020 Metrological
+ * Copyright 2025 CoreFrame.work
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,17 +34,20 @@ namespace Crypto {
 
     class EXTERNAL Certificate {
     public:
-        Certificate() = delete;
-        Certificate& operator=(Certificate&&) = delete;
-        Certificate& operator=(const Certificate&) = delete;
-
+        Certificate() : _certificate(nullptr) {}
         Certificate(const x509_st* certificate);
         Certificate(const TCHAR fileName[]);
         Certificate(Certificate&& move) noexcept;
         Certificate(const Certificate& copy);
         ~Certificate();
 
+        Certificate& operator=(Certificate&&) noexcept;
+        Certificate& operator=(const Certificate&);
+
     public:
+        bool IsValid() const {
+            return(_certificate != nullptr);
+        }
         string Issuer() const;
         string Subject() const;
         Core::Time ValidFrom() const;
@@ -59,10 +63,7 @@ namespace Crypto {
     };
     class EXTERNAL Key {
     public:
-        Key() = delete;
-        Key& operator=(Key&&) = delete;
-        Key& operator=(const Key&) = delete;
-
+        Key() : _key(nullptr) {}
         Key(const evp_pkey_st* key);
         Key(const string& fileName);
         Key(const string& fileName, const string& password);
@@ -70,7 +71,13 @@ namespace Crypto {
         Key(const Key& copy);
         ~Key();
 
+        Key& operator=(Key&&) noexcept;
+        Key& operator=(const Key&);
+
     public:
+        bool IsValid() const {
+            return(_key != nullptr);
+        }
         inline operator const evp_pkey_st* () const {
             return (_key);
         }
